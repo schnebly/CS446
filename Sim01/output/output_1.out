@@ -1,0 +1,42 @@
+
+Configuration File Data: 
+Version: 1
+Meta-Data File: test_3a.mdf
+Processor speed = 10
+Monitor speed = 25
+Hard Drive speed = 50
+Printer speed = 500
+Keyboard speed = 1000
+Memory speed = 35
+Mouse speed = 20
+Speaker speed = 10
+Log: Log to Both
+Log File: output/output_1.out
+
+Meta-Data Metrics
+M(allocate)12 - 420 ms
+I(keyboard)6 - 6000 ms
+O(printer)15 - 7500 ms
+P(run)10 - 100 ms
+I(harddrive)14 - 700 ms
+O(printer)10 - 5000 ms
+P(run)9 - 90 ms
+P(run)9 - 90 ms
+I(keyboard)5 - 5000 ms
+P(run)14 - 140 ms
+O(harddrive)9 - 450 ms
+I(keyboard)15 - 15000 ms
+O(harddrive)5 - 250 ms
+I(harddrive)12 - 600 ms
+O(harddrive)7 - 350 ms
+P(run)8 - 80 ms
+I(harddrive)12 - 600 ms
+O(printer)12 - 6000 ms
+P(run)11 - 110 ms
+I(keyboard)10 - 10000 ms
+P(run)10 - 100 ms
+O(printer)15 - 7500 ms
+I(keyboard)6 - 6000 ms
+P(run)11 - 110 ms
+P(run)14 - 140 ms
+O(printer)6 - 3000 ms

@@ -1,0 +1,30 @@
+Configuration File Data: 
+Version: 2
+Meta-Data File: Test_2a.mdf
+Processor speed = 12
+Monitor speed = 30
+Hard Drive speed = 18
+Printer speed = 250
+Keyboard speed = 5
+Memory speed = 25
+Mouse speed = 5
+Speaker speed = 15
+Log: Log to Both
+Log File: logfile_1.lgf
+System Memory: 1024
+
+Meta-Data Metrics
+P(run)11 - 132 ms
+M(allocate)2 - 50 ms
+O(monitor)7 - 210 ms
+I(harddrive)8 - 144 ms
+O(printer)20 - 5000 ms
+P(run)6 - 72 ms
+O(printer)4 - 1000 ms
+M(block)6 - 150 ms
+I(keyboard)17 - 85 ms
+M(block)4 - 100 ms
+P(run)5 - 60 ms
+P(run)5 - 60 ms
+O(harddrive)6 - 108 ms
+P(run)18 - 216 ms
