@@ -1,30 +1,33 @@
-Configuration File Data: 
-Version: 2
-Meta-Data File: Test_2a.mdf
-Processor speed = 12
-Monitor speed = 30
-Hard Drive speed = 18
-Printer speed = 250
-Keyboard speed = 5
-Memory speed = 25
-Mouse speed = 5
-Speaker speed = 15
-Log: Log to Both
-Log File: logfile_1.lgf
-System Memory: 1024
-
-Meta-Data Metrics
-P(run)11 - 132 ms
-M(allocate)2 - 50 ms
-O(monitor)7 - 210 ms
-I(harddrive)8 - 144 ms
-O(printer)20 - 5000 ms
-P(run)6 - 72 ms
-O(printer)4 - 1000 ms
-M(block)6 - 150 ms
-I(keyboard)17 - 85 ms
-M(block)4 - 100 ms
-P(run)5 - 60 ms
-P(run)5 - 60 ms
-O(harddrive)6 - 108 ms
-P(run)18 - 216 ms
+5.824e-06 - Simulator program starting
+4.0995e-05 - OS: preparing Process 1
+4.0995e-05 - OS: starting Process 1
+5.8025e-05 - Process 1: processing action
+0.265156 - Process 1: end processing action
+0.265223 - Process 1: allocating memory
+0.366836 - Process 1: memory alllocated at 0x00000392
+0.366888 - Process 1: monitor output
+0.57806 - Process 1: end monitor output
+0.578106 - Process 1: hard drive input
+0.722497 - Process 1: end hard drive input
+0.722518 - Process 1: printer output
+5.72382 - Process 1: end printer output
+5.72387 - Process 1: processing action
+5.86929 - Process 1: end processing action
+5.86933 - Process 1: printer output
+6.87027 - Process 1: end printer output
+6.87029 - Process 1: memory blocking
+7.17116 - Process 1: end memory blocking
+7.17126 - Process 1: keyboard input
+7.25708 - Process 1: end keyboard input
+7.25709 - Process 1: memory blocking
+7.45772 - Process 1: end memory blocking
+7.45777 - Process 1: processing action
+7.57892 - Process 1: end processing action
+7.57896 - Process 1: processing action
+7.70014 - Process 1: end processing action
+7.70019 - Process 1: hard drive output
+7.8084 - Process 1: end hard drive output
+7.80842 - Process 1: processing action
+8.24152 - Process 1: end processing action
+8.2416 - OS: removing Process 1
+8.24163 - Simulator program ending

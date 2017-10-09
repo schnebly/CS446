@@ -10,6 +10,6 @@ Speaker cycle time (msec): 15
 Memory cycle time (msec): 25
 Mouse cycle time (msec): 5
 Keyboard cycle time (msec): 5
-Log: Log to Both
+Log: Log to Monitor
 Log File Path: logfile_1.lgf
 End Simulator Configuration File

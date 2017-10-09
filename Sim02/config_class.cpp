@@ -37,10 +37,11 @@ Configuration::~Configuration()
 // function that parses config file
 void Configuration::loadConfig(ifstream& fin)
 {
-	string phrase;
+	string phrase = "";
 	char sym;
+	string configVarArray[10] = {"Processor", "Monitor", "Hard", "Printer", "Keyboard", "Memory", "Mouse", "System", "Speaker"};
 	fin >> sym;
-	phrase = "";
+
 
 	while (sym != ':')
 	{
@@ -56,84 +57,109 @@ void Configuration::loadConfig(ifstream& fin)
 	fin >> metaDataFile;
 	sym = 'x';
 
-	while (sym != ':')
+	while(phrase != "Log:")
 	{
-		fin >> sym;
-	}
-	fin >> processor_ct;
-	sym = 'x';
+		fin >> phrase;
+		if (phrase == configVarArray[0])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> processor_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[1])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> monitor_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[2])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> hDrive_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[3])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> printer_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[4])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> keyboard_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[5])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> memory_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[6])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> mouse_ct;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[7])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> sysMemory;
+			sym = 'x';
+		}
+		else if (phrase == configVarArray[8])
+		{
+			while (sym != ':')
+			{
+				fin >> sym;
+			}
+			fin >> speaker_ct;
+			sym = 'x';
+		}
+		
+	}	
 
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> monitor_ct;
 	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> hDrive_ct;
-	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> printer_ct;
-	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> keyboard_ct;
-	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> memory_ct;
-	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> mouse_ct;
-	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> sysMemory;
-	sym = 'x';
-
-	while (sym != ':')
-	{
-		fin >> sym;
-	}
-	fin >> speaker_ct;
-	sym = 'x';
-
-	while (phrase != "to")
+	while(phrase != "to")
 	{
 		fin >> phrase;
 	}
 	fin >> logMF;
-	phrase = "";
 
 	while (sym != ':')
 	{
-		fin >> sym;
+		while (sym != ':')
+		{
+			fin >> sym;
+		}
+			fin >> logFileName;
 	}
-	fin >> logFileName;
-	sym = 'x';
 
-	
 
 }
 
