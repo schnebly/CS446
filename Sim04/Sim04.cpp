@@ -1,8 +1,8 @@
 /*
   Author: James Schnebly
-  Title: Sim03.cpp
+  Title: Sim04.cpp
   Class: CS446/646
-  Date: 10/6/2017 
+  Date: 11/1/2017 
 */
 
 #include <iostream>
@@ -46,6 +46,7 @@ struct PCB
 	4 = Exit = done running instrctions
 	*/
 	int processState;
+	int processNum;
 };
 
 PCB P;
@@ -116,8 +117,6 @@ int main(int argc, char* argv[])
 	cout << "Time(sec) ------ Function" << endl;
 	cout << "-------------------------";
 	runP2(config, metaDataQueue, config.getLogMF(),fout);
-
-	config.printConfig();
 	
 	pthread_exit(0);
 
@@ -134,6 +133,7 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 	cout << endl;
 
 	int iterator = -1;
+	P.processNum = 0;
 	int PRNTRNum = 0;
 	int PRNTRNumTot = config.getprinterCount();
 	int HDDNum = 0;
@@ -194,11 +194,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << " memory" << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " memory" << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << " memory" << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " memory" << endl;
 			}
 
 			iterator++;
@@ -211,11 +211,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			
 		} 
@@ -234,11 +234,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 				P.processState = RUNNING;
 				if(x == "File" || x == "Both")
 				{
-					fout << tSpan.count() << " - Process 1: " << "Start " << p << " on HDD " << HDDNum << endl;
+					fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " on HDD " << HDDNum << endl;
 				}
 				if (x == "Monitor" || x == "Both")
 				{
-					cout << tSpan.count() << " - Process 1: "  << "Start " << p << " on HDD " << HDDNum << endl;
+					cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " on HDD " << HDDNum << endl;
 				}
 				sem_wait(&sem);
 				pthread_create(&tid, &attr, runner, vPtr);
@@ -260,11 +260,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 				P.processState = RUNNING;
 				if(x == "File" || x == "Both")
 				{
-					fout << tSpan.count() << " - Process 1: " << "Start " << p << " on HDD " << HDDNum << endl;
+					fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " on HDD " << HDDNum << endl;
 				}
 				if (x == "Monitor" || x == "Both")
 				{
-					cout << tSpan.count() << " - Process 1: " << "Start " << p << " on HDD " << HDDNum << endl;
+					cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " on HDD " << HDDNum << endl;
 				}
 				sem_wait(&sem);
 				pthread_create(&tid, &attr, runner, vPtr);
@@ -296,16 +296,16 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			}
 			if (mdc == 'A')
 			{
-				p = "OS: removing Process 1";
+				p = "OS: removing Process ";
 				P.processState = EXIT;
 				duration<float> tSpan = duration_cast<duration<float>>(before - start);
 				if(x == "File" || x == "Both")
 				{
-					fout << tSpan.count() << " - " << p << endl;
+					fout << tSpan.count() << " - " << p << P.processNum <<  endl;
 				}
 				if (x == "Monitor" || x == "Both")
 				{
-					cout << tSpan.count() << " - " << p << endl;
+					cout << tSpan.count() << " - " << p << P.processNum << endl;
 				}
 			}
 			
@@ -323,11 +323,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			sem_wait(&sem);
 			pthread_create(&tid, &attr, runner, vPtr);
@@ -349,11 +349,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << " on PRNTR " << PRNTRNum << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << " on PRNTR " << PRNTRNum << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p <<  " on PRNTR "  << PRNTRNum << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p <<  " on PRNTR "  << PRNTRNum << endl;
 			}
 			sem_wait(&sem);
 			pthread_create(&tid, &attr, runner, vPtr);
@@ -376,11 +376,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			sem_wait(&sem);
 			pthread_create(&tid, &attr, runner, vPtr);
@@ -407,26 +407,27 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			}
 			if (mdc == 'A')
 			{
-				p = "OS: preparing Process 1";
+				P.processNum++;
+				p = "OS: preparing Process ";
 				P.processState = READY;
 				duration<float> tSpan = duration_cast<duration<float>>(before - start);
 				if(x == "File" || x == "Both")
 				{
-					fout << tSpan.count() << " - " << p << endl;
+					fout << tSpan.count() << " - " << p << P.processNum << endl;
 				}
 				if (x == "Monitor" || x == "Both")
 				{
-					cout << tSpan.count() << " - " << p << endl;
+					cout << tSpan.count() << " - " << p << P.processNum << endl;
 				}
-				p = "OS: starting Process 1";
+				p = "OS: starting Process ";
 				P.processState = RUNNING;
 				if(x == "File" || x == "Both")
 				{
-					fout << tSpan.count() << " - " << p << endl;
+					fout << tSpan.count() << " - " << p << P.processNum << endl;
 				}
 				if (x == "Monitor" || x == "Both")
 				{
-					cout << tSpan.count() << " - " << p << endl;
+					cout << tSpan.count() << " - " << p << P.processNum << endl;
 				}
 			}
 			
@@ -444,11 +445,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			sem_wait(&sem);
 			pthread_create(&tid, &attr, runner, vPtr);
@@ -470,11 +471,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			sem_wait(&sem);
 			pthread_create(&tid, &attr, runner, vPtr);
@@ -491,11 +492,11 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			P.processState = RUNNING;
 			if(x == "File" || x == "Both")
 			{
-				fout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 			if (x == "Monitor" || x == "Both")
 			{
-				cout << tSpan.count() << " - Process 1: " << "Start " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": Start " << p << endl;
 			}
 		} 
 		else
@@ -529,12 +530,12 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			
 			if (p == "allocating")
 			{
-				cout << tSpan.count() << " - Process 1: memory alllocated at 0x" << setfill('0') << setw(8) <<  hex << allocateMemory(config.getSysMemory(), config.getblockSize(), iterator) << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": memory alllocated at 0x" << setfill('0') << setw(8) <<  hex << allocateMemory(config.getSysMemory(), config.getblockSize(), iterator) << endl;
 				cout.copyfmt(ios(NULL));
 			}
 			else if(mdc != 'A' || mdc != 'S')
 			{
-				cout << tSpan.count() << " - Process 1: End " << p << endl;
+				cout << tSpan.count() << " - Process " << P.processNum << ": End " << p << endl;
 			}
 
 		}
@@ -552,12 +553,12 @@ void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, 
 			
 			if (p == "allocating")
 			{
-				fout << tSpan.count() << " - Process 1: memory alllocated at 0x" << setfill('0') << setw(8) <<  hex << allocateMemory(config.getSysMemory(), config.getblockSize(), iterator) << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": memory alllocated at 0x" << setfill('0') << setw(8) <<  hex << allocateMemory(config.getSysMemory(), config.getblockSize(), iterator) << endl;
 				fout.copyfmt(ios(NULL));
 			}
 			else if(mdc != 'A' || mdc != 'S')
 			{
-				fout << tSpan.count() << " - Process 1: End " << p << endl;
+				fout << tSpan.count() << " - Process " << P.processNum << ": End " << p << endl;
 			}
 		}
 		
