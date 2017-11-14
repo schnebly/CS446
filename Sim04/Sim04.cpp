@@ -35,7 +35,7 @@ void printToLog(Configuration config, ofstream& fout);
 int myWait(int ms);
 void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout);
 void* runner(void* total);
-void sjfSetup(queue <MetaDataNode> metaDataQueue);
+void sjfSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x, ofstream& fout);
 int getTotalProcesses(queue <MetaDataNode> metaDataQueue);
 
 struct PCB
@@ -119,22 +119,51 @@ int main(int argc, char* argv[])
 
 	if (cpuSch == "FIFO")
 	{	
+		if( config.getLogMF() == "Monitor" || config.getLogMF() == "Both")
+		{
+			cout << "***********FIFO**********" << endl;
+			cout << "Time(sec) ------ Function" << endl;
+			cout << "-------------------------" << endl;
+		}
+		if( config.getLogMF() == "File" || config.getLogMF() == "Both")
+		{
+			fout << "***********FIFO**********" << endl;
+			fout << "Time(sec) ------ Function" << endl;
+			fout << "-------------------------" << endl;
+		}
 		runFIFO(config, metaDataQueue, config.getLogMF(),fout);
 	}
 	else if (cpuSch == "SJF")
 	{	
-		cout << "***********SJF**********" << endl;
-		cout << "Time(sec) ------ Function" << endl;
-		cout << "-------------------------" << endl;
-		sjfSetup(metaDataQueue);
+		if( config.getLogMF() == "Monitor" || config.getLogMF() == "Both")
+		{
+			cout << "***********SJF***********" << endl;
+			cout << "Time(sec) ------ Function" << endl;
+			cout << "-------------------------" << endl;
+		}
+		if( config.getLogMF() == "File" || config.getLogMF() == "Both")
+		{
+			fout << "***********SJF***********" << endl;
+			fout << "Time(sec) ------ Function" << endl;
+			fout << "-------------------------" << endl;
+		}
+		sjfSetup(metaDataQueue, config, config.getLogMF(), fout);
 		
 	}
 	else if (cpuSch == "PS")
 	{	
-		cout << "***********PS**********" << endl;
-		cout << "Time(sec) ------ Function" << endl;
-		cout << "-------------------------" << endl;
-		
+		if( config.getLogMF() == "Monitor" || config.getLogMF() == "Both")
+		{
+			cout << "************PS***********" << endl;
+			cout << "Time(sec) ------ Function" << endl;
+			cout << "-------------------------" << endl;
+		}
+		if( config.getLogMF() == "File" || config.getLogMF() == "Both")
+		{
+			fout << "************PS***********" << endl;
+			fout << "Time(sec) ------ Function" << endl;
+			fout << "-------------------------" << endl;
+		}
 	}
 	else
 	{
@@ -153,19 +182,6 @@ void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x
 	fout.open(config.getLogFileName());
 
 	high_resolution_clock::time_point start = high_resolution_clock::now();
-
-	if( config.getLogMF() == "Monitor" || config.getLogMF() == "Both")
-	{
-		cout << "***********FIFO**********" << endl;
-		cout << "Time(sec) ------ Function" << endl;
-		cout << "-------------------------" << endl;
-	}
-	if( config.getLogMF() == "File" || config.getLogMF() == "Both")
-	{
-		fout << "***********FIFO**********" << endl;
-		fout << "Time(sec) ------ Function" << endl;
-		fout << "-------------------------" << endl;
-	}
 
 	int iterator = -1;
 	P.processNum = 0;
@@ -697,7 +713,7 @@ void* runner(void* total)
 	pthread_exit(0);
 }
 
-void sjfSetup(queue <MetaDataNode> metaDataQueue)
+void sjfSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x, ofstream& fout)
 {
 
 	int current_process = 0;
@@ -707,6 +723,14 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue)
 
 	int totalProcesses = getTotalProcesses(metaDataQueue);
 	int processExecution[totalProcesses] = {0};
+
+	queue <MetaDataNode> copyQueue;
+	copyQueue.push(metaDataQueue.front());
+
+	queue <MetaDataNode> runQueue;
+
+	MetaDataNode start = MetaDataNode('S', "start", 0);
+	runQueue.push(start);
 
 	// Setup Function//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -722,11 +746,13 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue)
 		while(!(metaDataQueue.front().getInstruction() == "end" && metaDataQueue.front().getHardwareChar() == 'A'))
 		{
 			node_tally++;
+			copyQueue.push(metaDataQueue.front());
 			metaDataQueue.pop();
 		}
 
 		// account for and pop off the a(end)0
 		node_tally += 1;
+		copyQueue.push(metaDataQueue.front());
 		metaDataQueue.pop();
 
 		//update the shortest variables if neccessary
@@ -757,6 +783,7 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue)
 
 		if (metaDataQueue.front().getInstruction() == "end" && metaDataQueue.front().getHardwareChar() == 'S')
 		{
+			copyQueue.push(metaDataQueue.front());
 			break;
 		}
 	}
@@ -766,6 +793,10 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue)
 
 	int position = 1;
 	int index = 0;
+	int processCounter = 0;
+
+	queue <MetaDataNode> backupQueue = copyQueue;
+
 	for(position = 1; position < totalProcesses + 1; position++)
 	{
 		while(processExecution[index] != position)
@@ -773,14 +804,49 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue)
 			index++;
 		}
 
-		// Replace with run function start
-		cout << "Run Process " << index + 1 << endl;
-		// End
+		index += 1;
+
+		//reload copyQueue
+		copyQueue = backupQueue;
+
+		// START load runQueue
+		processCounter = 0;
+
+		while(processCounter != index)
+		{
+
+			if (copyQueue.front().getHardwareChar() == 'A' && copyQueue.front().getInstruction() == "start")
+			{
+				processCounter++;
+
+				if (processCounter < index)
+				{
+					copyQueue.pop();
+				}
+				
+			}
+			else
+			{
+				copyQueue.pop();
+			}
+		}
+
+		while(!(copyQueue.front().getHardwareChar() == 'A' && copyQueue.front().getInstruction() == "end"))
+		{
+			runQueue.push(copyQueue.front());
+			copyQueue.pop();
+		}
+
+		runQueue.push(copyQueue.front());
+		copyQueue.pop();
+		// END load runQueue
 
 		index = 0;
 	}
 
-
+	MetaDataNode end = MetaDataNode('S', "end", 0);
+	runQueue.push(end);
+	runFIFO(config, runQueue, config.getLogMF(),fout);
 	// End Run//////////////////////////////////////////////////////////////////////////////////////////////
 }	
 

@@ -1,3 +1,0 @@
-6.2 Specification Bullet #3 (example config has speaker and printer)
-6.4 Example Input has 3 A(Start)0 but only 2 A(End)0
-6.5 Example Output has "End process 1" "End process 2" but for process 3 it has "process 3 completed"
