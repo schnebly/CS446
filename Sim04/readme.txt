@@ -5,9 +5,8 @@ Proj.4 readme.txt
 
 To-Do
 -------------------
-FIFO Run Function
 PS Run Function
 SJF Run Function
 
 
-Memory Allocation??
+Memory Allocation + HDD PRNTR reset per process??

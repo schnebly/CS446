@@ -33,8 +33,10 @@ void setupCursor(ifstream& fin);
 void printMetaData(queue <MetaDataNode> metaDataQueue);
 void printToLog(Configuration config, ofstream& fout);
 int myWait(int ms);
-void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout);
+void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout);
 void* runner(void* total);
+void sjfSetup(queue <MetaDataNode> metaDataQueue);
+int getTotalProcesses(queue <MetaDataNode> metaDataQueue);
 
 struct PCB
 {
@@ -113,24 +115,57 @@ int main(int argc, char* argv[])
 
 
 // Begin Display
-	cout << endl;
-	cout << "Time(sec) ------ Function" << endl;
-	cout << "-------------------------";
-	runP2(config, metaDataQueue, config.getLogMF(),fout);
+	string cpuSch = config.getcpuCode();
+
+	if (cpuSch == "FIFO")
+	{	
+		runFIFO(config, metaDataQueue, config.getLogMF(),fout);
+	}
+	else if (cpuSch == "SJF")
+	{	
+		cout << "***********SJF**********" << endl;
+		cout << "Time(sec) ------ Function" << endl;
+		cout << "-------------------------" << endl;
+		sjfSetup(metaDataQueue);
+		
+	}
+	else if (cpuSch == "PS")
+	{	
+		cout << "***********PS**********" << endl;
+		cout << "Time(sec) ------ Function" << endl;
+		cout << "-------------------------" << endl;
+		
+	}
+	else
+	{
+		cout << "Error: Unknown CPU Scheduling Code. Check configuration file." << endl;
+	}
+	
 	
 	pthread_exit(0);
 
 // End Display
 }
 
-void runP2(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout)
+void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout)
 {
 	fout.clear();
 	fout.open(config.getLogFileName());
 
 	high_resolution_clock::time_point start = high_resolution_clock::now();
 
-	cout << endl;
+	if( config.getLogMF() == "Monitor" || config.getLogMF() == "Both")
+	{
+		cout << "***********FIFO**********" << endl;
+		cout << "Time(sec) ------ Function" << endl;
+		cout << "-------------------------" << endl;
+	}
+	if( config.getLogMF() == "File" || config.getLogMF() == "Both")
+	{
+		fout << "***********FIFO**********" << endl;
+		fout << "Time(sec) ------ Function" << endl;
+		fout << "-------------------------" << endl;
+	}
 
 	int iterator = -1;
 	P.processNum = 0;
@@ -660,4 +695,108 @@ void* runner(void* total)
 	int* a = (int*)total;
 	myWait(*a);
 	pthread_exit(0);
+}
+
+void sjfSetup(queue <MetaDataNode> metaDataQueue)
+{
+
+	int current_process = 0;
+	int shortest_process = -1;
+	int node_tally = 0;
+	int shortest_process_node_tally = 9999999;
+
+	int totalProcesses = getTotalProcesses(metaDataQueue);
+	int processExecution[totalProcesses] = {0};
+
+	// Setup Function//////////////////////////////////////////////////////////////////////////////////////////////
+
+	// pop off the S(start)0
+	metaDataQueue.pop();
+
+	while(metaDataQueue.empty() != 1)
+	{
+		current_process++;
+		node_tally = 0;
+
+		// counts nodes in process
+		while(!(metaDataQueue.front().getInstruction() == "end" && metaDataQueue.front().getHardwareChar() == 'A'))
+		{
+			node_tally++;
+			metaDataQueue.pop();
+		}
+
+		// account for and pop off the a(end)0
+		node_tally += 1;
+		metaDataQueue.pop();
+
+		//update the shortest variables if neccessary
+		if (node_tally < shortest_process_node_tally)
+		{
+			shortest_process = current_process;
+			shortest_process_node_tally = node_tally;
+
+			processExecution[current_process - 1] = 1;
+
+			for (int i = 0; i < current_process; ++i)
+			{
+				if (i == current_process - 1)
+				{
+					break;
+				}
+				else
+				{
+					processExecution[i] += 1;
+				}
+			}
+		}
+		else
+		{
+			processExecution[current_process - 1] = current_process;
+		}
+
+
+		if (metaDataQueue.front().getInstruction() == "end" && metaDataQueue.front().getHardwareChar() == 'S')
+		{
+			break;
+		}
+	}
+
+	// End Setup////////////////////////////////////////////////////////////////////////////////////////////
+	// Run Function/////////////////////////////////////////////////////////////////////////////////////////
+
+	int position = 1;
+	int index = 0;
+	for(position = 1; position < totalProcesses + 1; position++)
+	{
+		while(processExecution[index] != position)
+		{
+			index++;
+		}
+
+		// Replace with run function start
+		cout << "Run Process " << index + 1 << endl;
+		// End
+
+		index = 0;
+	}
+
+
+	// End Run//////////////////////////////////////////////////////////////////////////////////////////////
+}	
+
+int getTotalProcesses(queue <MetaDataNode> metaDataQueue)
+{
+	int counter;
+
+	while(metaDataQueue.empty() != 1)
+	{
+		if (metaDataQueue.front().getHardwareChar() == 'A' && metaDataQueue.front().getInstruction() == "start")
+		{
+			counter++;
+		}
+
+		metaDataQueue.pop();
+	}
+
+	return counter;
 }
