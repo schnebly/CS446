@@ -33,10 +33,11 @@ void setupCursor(ifstream& fin);
 void printMetaData(queue <MetaDataNode> metaDataQueue);
 void printToLog(Configuration config, ofstream& fout);
 int myWait(int ms);
-void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout);
+void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout, queue <int> executionQueue);
 void* runner(void* total);
 void sjfSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x, ofstream& fout);
 int getTotalProcesses(queue <MetaDataNode> metaDataQueue);
+void psSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x, ofstream& fout);
 
 struct PCB
 {
@@ -116,6 +117,7 @@ int main(int argc, char* argv[])
 
 // Begin Display
 	string cpuSch = config.getcpuCode();
+	queue <int> fakeQueue;
 
 	if (cpuSch == "FIFO")
 	{	
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
 			fout << "Time(sec) ------ Function" << endl;
 			fout << "-------------------------" << endl;
 		}
-		runFIFO(config, metaDataQueue, config.getLogMF(),fout);
+		runFIFO(config, metaDataQueue, config.getLogMF(),fout, fakeQueue);
 	}
 	else if (cpuSch == "SJF")
 	{	
@@ -164,6 +166,7 @@ int main(int argc, char* argv[])
 			fout << "Time(sec) ------ Function" << endl;
 			fout << "-------------------------" << endl;
 		}
+		psSetup(metaDataQueue, config, config.getLogMF(), fout);
 	}
 	else
 	{
@@ -176,7 +179,7 @@ int main(int argc, char* argv[])
 // End Display
 }
 
-void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout)
+void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x, ofstream& fout, queue <int> executionQueue)
 {
 	fout.clear();
 	fout.open(config.getLogFileName());
@@ -197,7 +200,7 @@ void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x
 	while(metaDataQueue.empty() != 1)
 		{
 			fout << fixed << setprecision(6);
-			cout << fixed << setprecision(6);
+			cout << fixed << setprecision(6);			
 
 	 		char mdc = metaDataQueue.front().getHardwareChar();
 			string mdd = metaDataQueue.front().getInstruction();
@@ -233,6 +236,7 @@ void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x
 
 		int total = 0;
 		int ct = 0;
+
 		string p;
 
 		high_resolution_clock::time_point before = high_resolution_clock::now();
@@ -458,7 +462,19 @@ void runFIFO(Configuration config, queue <MetaDataNode>& metaDataQueue, string x
 			}
 			if (mdc == 'A')
 			{
-				P.processNum++;
+				if(config.getcpuCode() == "FIFO")
+				{ 
+					P.processNum++;
+				}
+				else if (config.getcpuCode() == "SJF" || config.getcpuCode() == "PS")
+				{
+					P.processNum = executionQueue.front();
+					executionQueue.pop();
+				}
+
+				iterator = -1;
+				PRNTRNum = 0;
+				HDDNum = 0;
 				p = "OS: preparing Process ";
 				P.processState = READY;
 				duration<float> tSpan = duration_cast<duration<float>>(before - start);
@@ -728,6 +744,7 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x
 	copyQueue.push(metaDataQueue.front());
 
 	queue <MetaDataNode> runQueue;
+	queue <int> executionQueue;
 
 	MetaDataNode start = MetaDataNode('S', "start", 0);
 	runQueue.push(start);
@@ -806,6 +823,9 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x
 
 		index += 1;
 
+		// load executionQueue
+		executionQueue.push(index);
+
 		//reload copyQueue
 		copyQueue = backupQueue;
 
@@ -846,7 +866,7 @@ void sjfSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x
 
 	MetaDataNode end = MetaDataNode('S', "end", 0);
 	runQueue.push(end);
-	runFIFO(config, runQueue, config.getLogMF(),fout);
+	runFIFO(config, runQueue, config.getLogMF(),fout, executionQueue);
 	// End Run//////////////////////////////////////////////////////////////////////////////////////////////
 }	
 
@@ -865,4 +885,152 @@ int getTotalProcesses(queue <MetaDataNode> metaDataQueue)
 	}
 
 	return counter;
+}
+
+void psSetup(queue <MetaDataNode> metaDataQueue, Configuration config, string x, ofstream& fout)
+{
+	
+	int current_process = 0;
+	int longest_process = -1;
+	int io_node_tally = 0;
+	int longest_process_node_tally = -99999999;
+
+	int totalProcesses = getTotalProcesses(metaDataQueue);
+	int processExecution[totalProcesses] = {0};
+
+	queue <MetaDataNode> copyQueue;
+	copyQueue.push(metaDataQueue.front());
+
+	queue <MetaDataNode> runQueue;
+	queue <int> executionQueue;
+
+	MetaDataNode start = MetaDataNode('S', "start", 0);
+	runQueue.push(start);
+
+	// Setup Function//////////////////////////////////////////////////////////////////////////////////////////////
+
+	// pop off the S(start)0
+	metaDataQueue.pop();
+
+	while(metaDataQueue.empty() != 1)
+	{
+		current_process++;
+		io_node_tally = 0;
+
+		// counts io nodes in process
+		while(!(metaDataQueue.front().getInstruction() == "end" && metaDataQueue.front().getHardwareChar() == 'A'))
+		{
+			if(metaDataQueue.front().getHardwareChar() == 'I' || metaDataQueue.front().getHardwareChar() == 'O')
+			{
+				io_node_tally++;
+				copyQueue.push(metaDataQueue.front());
+				metaDataQueue.pop();
+			}
+			else
+			{
+				copyQueue.push(metaDataQueue.front());
+				metaDataQueue.pop();				
+			}
+		}
+
+		// account for and pop off the a(end)0
+		copyQueue.push(metaDataQueue.front());
+		metaDataQueue.pop();
+
+		//update the longestvariables if neccessary
+		if (io_node_tally > longest_process_node_tally)
+		{
+			longest_process = current_process;
+			longest_process_node_tally = io_node_tally;
+
+			processExecution[current_process - 1] = 1;
+
+			for (int i = 0; i < current_process; ++i)
+			{
+				if (i == current_process - 1)
+				{
+					break;
+				}
+				else
+				{
+					processExecution[i] += 1;
+				}
+			}
+		}
+		else
+		{
+			processExecution[current_process - 1] = current_process;
+		}
+
+
+		if (metaDataQueue.front().getInstruction() == "end" && metaDataQueue.front().getHardwareChar() == 'S')
+		{
+			copyQueue.push(metaDataQueue.front());
+			break;
+		}
+	}
+
+	// End Setup////////////////////////////////////////////////////////////////////////////////////////////
+	// Run Function/////////////////////////////////////////////////////////////////////////////////////////
+
+	int position = 1;
+	int index = 0;
+	int processCounter = 0;
+
+	queue <MetaDataNode> backupQueue = copyQueue;
+
+	for(position = 1; position < totalProcesses + 1; position++)
+	{
+		while(processExecution[index] != position)
+		{
+			index++;
+		}
+
+		index += 1;
+
+		// load executionQueue
+		executionQueue.push(index);
+
+		//reload copyQueue
+		copyQueue = backupQueue;
+
+		// START load runQueue
+		processCounter = 0;
+
+		while(processCounter != index)
+		{
+
+			if (copyQueue.front().getHardwareChar() == 'A' && copyQueue.front().getInstruction() == "start")
+			{
+				processCounter++;
+
+				if (processCounter < index)
+				{
+					copyQueue.pop();
+				}
+				
+			}
+			else
+			{
+				copyQueue.pop();
+			}
+		}
+
+		while(!(copyQueue.front().getHardwareChar() == 'A' && copyQueue.front().getInstruction() == "end"))
+		{
+			runQueue.push(copyQueue.front());
+			copyQueue.pop();
+		}
+
+		runQueue.push(copyQueue.front());
+		copyQueue.pop();
+		// END load runQueue
+
+		index = 0;
+	}
+
+	MetaDataNode end = MetaDataNode('S', "end", 0);
+	runQueue.push(end);
+	runFIFO(config, runQueue, config.getLogMF(),fout, executionQueue);
+	// End Run//////////////////////////////////////////////////////////////////////////////////////////////
 }
